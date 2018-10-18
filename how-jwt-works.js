@@ -1,21 +1,15 @@
-const btoa = require("btoa");
-const atob = require("atob");
+const base64url = require('base64-url')
 
-/* === base 64 encoding === */
-// 1. base64-encoding the header
+// 1. base64url-encoding the header
 const header = {
   alg: "HS256",
   typ: "JWT"
 };
 
-const encodedHeader = btoa(JSON.stringify(header));
-// console.log(encodedHeader);
+const encodedHeader = base64url.encode(JSON.stringify(header));
+console.log("JWT header", encodedHeader);
 
-// base64-decoding the header
-const decoded = JSON.parse(atob(encodedHeader));
-// console.log(decoded);
-
-// 2. repeat for payload
+// 2. encoding for payload
 const payload = {
   sub: "1234567890",
   name: "John Doe",
@@ -23,14 +17,10 @@ const payload = {
   iat: 1516239022
 };
 
-const encodedPayload = btoa(JSON.stringify(payload));
-// console.log(encodedPayload);
+const encodedPayload = base64url.encode(JSON.stringify(payload));
+console.log("JWT payload", encodedPayload);
 
-const decodedPayload = JSON.parse(atob(encodedPayload));
-// console.log(decodedPayload);
-
-/* === encryption === */
-// 3. creating an encrypted signature using sha256 algorithm
+// 3. creating an encrypted signature using HMAC sha256 algorithm
 const crypto = require("crypto");
 const key = "some_secret";
 
@@ -38,4 +28,13 @@ const hash = crypto
   .createHmac("sha256", key)
   .update(`${encodedHeader}.${encodedPayload}`)
   .digest("base64");
-console.log(hash);
+
+console.log("JWT signature", hash);
+console.log("")
+
+// base64url-decoding the header
+const decoded = JSON.parse(base64url.decode(encodedHeader));
+console.log("Decoded header", decoded);
+
+const decodedPayload = JSON.parse(base64url.decode(encodedPayload));
+console.log("Decoded payload", decodedPayload);
